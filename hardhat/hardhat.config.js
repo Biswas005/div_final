@@ -1,15 +1,33 @@
-require('@nomiclabs/hardhat-ethers')
-const API_URL = "https://polygon-mumbai.g.alchemy.com/v2/IigFr15mxk11noHnS-_BSdfvBb5srVpI";
-const PRIVATE_KEY = "8e9ecfe3844dec1cad706e306b48e415ea34eacd377b786e2fa7902575486bf6"
-const PUBLIC_KEY = "0xF2c49A8eC26e9019aafEc284F6eB5EfFF0A95245";
+require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config(); // Import dotenv to use your .env variables
+
+const { POLYGON_MUMBAI_URL, PRIVATE_KEY } = process.env; // Access environment variables
+
 module.exports = {
-  solidity: "0.8.0",
-  defaultNetwork: "polygon mumbai",
-  networks: {
-    hardhat:{},
-    polygon:{
-      url: API_URL,
-      accounts: [`0x${PRIVATE_KEY}`]
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
     }
+  },
+  defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {},
+    polygon_mumbai: { // Correct network name
+      url: POLYGON_MUMBAI_URL,
+      accounts: [`0x${PRIVATE_KEY}`] // Correctly format the private key
+    }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+  mocha: {
+    timeout: 20000
   }
 };
