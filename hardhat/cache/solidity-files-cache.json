@@ -379,8 +379,8 @@
       ]
     },
     "C:\\Users\\amard\\div_final\\hardhat\\contracts\\IPFSStorageContract.sol": {
-      "lastModificationDate": 1707003535837,
-      "contentHash": "d0aac58d7b7221bee937da1adcb3c7c8",
+      "lastModificationDate": 1707010518233,
+      "contentHash": "ffe7517b3cc25164a9dcabe8d07b1140",
       "sourceName": "contracts/IPFSStorageContract.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -408,7 +408,7 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.0"
+        "^0.8.20"
       ],
       "artifacts": [
         "IPFSStorageContract"
