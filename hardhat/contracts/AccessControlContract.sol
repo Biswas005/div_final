@@ -1,34 +1,52 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AccessControlContract is Ownable {
-    mapping(bytes32 => mapping(address => bool)) public roles;
-
-    // Define constants for role identifiers
+contract AccessControlContract is AccessControl, Ownable {
+    // Define role constants
     bytes32 public constant UPLOADER_ROLE = keccak256("UPLOADER_ROLE");
     bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
-    // Add more roles as necessary
 
-    event RoleGranted(bytes32 indexed role, address indexed account);
-    event RoleRevoked(bytes32 indexed role, address indexed account);
+    // Constructor sets up the default admin role
+    constructor(address initialOwner) Ownable() {
+        // Transfer ownership to the initialOwner
+        transferOwnership(initialOwner);
 
-    // Grant a role to an address
-    function grantRole(bytes32 role, address account) public onlyOwner {
-        roles[role][account] = true;
-        emit RoleGranted(role, account);
+        // Grant the contract deployer (initial owner) the default admin role: they can grant and revoke any roles
+        _setupRole(DEFAULT_ADMIN_ROLE, initialOwner);
+
+        // Set up role admins
+        _setRoleAdmin(UPLOADER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(EDITOR_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
-    // Revoke a role from an address
-    function revokeRole(bytes32 role, address account) public onlyOwner {
-        roles[role][account] = false;
-        emit RoleRevoked(role, account);
+    // Override grantRole, revokeRole, and renounceRole to include onlyRole modifier for access control
+    // These functions are already defined in AccessControl, so they are being overridden here
+    // to include custom logic or restrictions if necessary
+
+    // Grant a role to a specific account
+    function grantRole(bytes32 role, address account) public override onlyRole(getRoleAdmin(role)) {
+        super.grantRole(role, account);
     }
 
-    // Modifier to use in other contracts or functions to restrict access
-    modifier onlyRole(bytes32 role) {
-        require(roles[role][msg.sender], "Not authorized");
-        _;
+    // Revoke a role from a specific account
+    function revokeRole(bytes32 role, address account) public override onlyRole(getRoleAdmin(role)) {
+        super.revokeRole(role, account);
+    }
+
+    // Renounce a role from the calling account
+    function renounceRole(bytes32 role, address account) public override {
+        super.renounceRole(role, account);
+    }
+
+    // In case the OpenZeppelin's AccessControl functions are not recognized, we'll explicitly set them
+    function _setupRole(bytes32 role, address account) internal override {
+        super._setupRole(role, account);
+    }
+
+    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal override {
+        super._setRoleAdmin(role, adminRole);
     }
 }
