@@ -10,8 +10,11 @@ async function main() {
     const AccessControl = await ethers.getContractFactory("AccessControlContract");
     const accessControl = await AccessControl.deploy(deployer.address);
     
-    // Wait for the transaction to be mined
-    //await accessControl.deployTransaction.wait();
+    // Wait for the deployment to be mined and verify success
+    await accessControl.deployTransaction.wait();
+    if (!accessControl.address) {
+        throw new Error("Deployment failed for AccessControlContract");
+    }
     console.log("AccessControlContract deployed to:", accessControl.address);
 
     // Deploy AIModelManagementContract
