@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./AccessControlContract.sol";
 
 contract AIModelManagementContract is Ownable {
-    // Structure to represent an AI model
+    AccessControlContract private accessControl;
+
     struct AIModel {
         address owner;
         string ipfsHash;
@@ -13,25 +14,24 @@ contract AIModelManagementContract is Ownable {
         string description;
     }
 
-    // Array to store all AI models
     AIModel[] public models;
 
-    // Access control contract instance
-    AccessControlContract accessControl;
-
-    // Event to emit when a new model is registered
     event ModelRegistered(uint indexed modelId, address indexed owner, string ipfsHash, string name, string description);
-    // Event to emit when a model is updated
     event ModelUpdated(uint indexed modelId, string ipfsHash, string name, string description);
 
-    constructor(address _accessControlAddress) {
+    constructor(address _accessControlAddress) Ownable() {
         accessControl = AccessControlContract(_accessControlAddress);
     }
 
     // Function to register a new AI model
     function registerModel(string memory ipfsHash, string memory name, string memory description) public {
         require(accessControl.hasRole(accessControl.UPLOADER_ROLE(), msg.sender), "Caller does not have uploader role");
-        models.push(AIModel(msg.sender, ipfsHash, name, description));
+        models.push(AIModel({
+            owner: msg.sender,
+            ipfsHash: ipfsHash,
+            name: name,
+            description: description
+        }));
         uint modelId = models.length - 1;
         emit ModelRegistered(modelId, msg.sender, ipfsHash, name, description);
     }
@@ -40,7 +40,7 @@ contract AIModelManagementContract is Ownable {
     function updateModel(uint modelId, string memory ipfsHash, string memory name, string memory description) public {
         require(modelId < models.length, "Model does not exist.");
         AIModel storage model = models[modelId];
-        require(msg.sender == model.owner || accessControl.hasRole(accessControl.EDITOR_ROLE(), msg.sender), "Caller is not owner or does not have editor role");
+        require(msg.sender == model.owner || accessControl.hasRole(accessControl.EDITOR_ROLE(), msg.sender), "Caller is not owner nor has editor role");
         model.ipfsHash = ipfsHash;
         model.name = name;
         model.description = description;

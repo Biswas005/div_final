@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
-contract ModelDeploymentContract {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract ModelDeploymentContract is Ownable {
     struct DeployedModel {
         address owner;
         string ipfsHash; // IPFS hash where the model is stored
@@ -11,22 +13,22 @@ contract ModelDeploymentContract {
 
     DeployedModel[] public deployedModels;
 
-    // Event to emit when a new model is deployed
     event ModelDeployed(uint indexed modelId, address indexed owner, string ipfsHash, string metadata);
-
-    // Event to emit when a model's status is updated
     event ModelStatusUpdated(uint indexed modelId, bool isActive);
+
+    // Constructor
+    constructor() Ownable() {}
 
     // Function to deploy a new model
     function deployModel(string memory ipfsHash, string memory metadata) public {
-        uint modelId = deployedModels.length;
-        deployedModels.push(DeployedModel({
+        DeployedModel memory newModel = DeployedModel({
             owner: msg.sender,
             ipfsHash: ipfsHash,
             metadata: metadata,
             isActive: true
-        }));
-        emit ModelDeployed(modelId, msg.sender, ipfsHash, metadata);
+        });
+        deployedModels.push(newModel);
+        emit ModelDeployed(deployedModels.length - 1, msg.sender, ipfsHash, metadata);
     }
 
     // Function to update model status (e.g., activate/deactivate)
